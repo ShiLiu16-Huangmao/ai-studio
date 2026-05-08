@@ -1,0 +1,22 @@
+{
+  "name": "@ai-radio/tts",
+  "version": "0.0.0",
+  "private": true,
+  "description": "TTS adapter interface and audio pipeline — streaming text-to-speech",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist .tsbuildinfo"
+  },
+  "dependencies": {
+    "@ai-radio/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.0"
+  }
+}

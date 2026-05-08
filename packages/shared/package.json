@@ -1,0 +1,22 @@
+{
+  "name": "@ai-radio/shared",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Shared types, constants, and event definitions for AI Radio",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist .tsbuildinfo"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.0"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

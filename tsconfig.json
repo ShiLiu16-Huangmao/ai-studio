@@ -1,0 +1,14 @@
+{
+  "files": [],
+  "references": [
+    { "path": "packages/shared" },
+    { "path": "packages/prompts" },
+    { "path": "packages/scheduler" },
+    { "path": "packages/tts" },
+    { "path": "packages/music" },
+    { "path": "packages/memory" },
+    { "path": "packages/brain" },
+    { "path": "apps/server" },
+    { "path": "apps/web" }
+  ]
+}

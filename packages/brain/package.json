@@ -1,0 +1,24 @@
+{
+  "name": "@ai-radio/brain",
+  "version": "0.0.0",
+  "private": true,
+  "description": "DJ Brain — persona management, context assembly, and prompt composition",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src/",
+    "clean": "rm -rf dist .tsbuildinfo"
+  },
+  "dependencies": {
+    "@ai-radio/shared": "workspace:*",
+    "@ai-radio/prompts": "workspace:*",
+    "@ai-radio/memory": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.4.0",
+    "typescript": "^5.8.0"
+  }
+}

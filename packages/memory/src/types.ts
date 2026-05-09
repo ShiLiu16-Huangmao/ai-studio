@@ -1,26 +1,26 @@
 // @ai-radio/memory — Memory types
 
-import type { MemoryEntry, MemoryType } from '@ai-radio/shared';
+import type { UserMemory, MemoryType } from '@ai-radio/shared';
 
 /** Storage interface — implemented by the server's repository layer */
 export interface MemoryStore {
   /** Search memories by keywords */
-  search(query: MemoryQuery): Promise<MemoryEntry[]>;
+  search(query: MemoryQuery): Promise<UserMemory[]>;
 
   /** Create new memory entries */
-  createMany(entries: ExtractedMemory[]): Promise<MemoryEntry[]>;
+  createMany(entries: ExtractedMemory[]): Promise<UserMemory[]>;
 
   /** Update an existing memory */
-  update(id: string, updates: Partial<MemoryEntry>): Promise<MemoryEntry | null>;
+  update(id: string, updates: Partial<UserMemory>): Promise<UserMemory | null>;
 
   /** Delete a memory */
   delete(id: string): Promise<void>;
 
   /** Get memories by type */
-  findByType(type: MemoryType, limit?: number): Promise<MemoryEntry[]>;
+  findByType(type: MemoryType, limit?: number): Promise<UserMemory[]>;
 
   /** Get recent memories */
-  findRecent(days: number, limit?: number): Promise<MemoryEntry[]>;
+  findRecent(days: number, limit?: number): Promise<UserMemory[]>;
 }
 
 export interface MemoryQuery {
@@ -31,7 +31,7 @@ export interface MemoryQuery {
 }
 
 export interface MemorySearchResult {
-  entries: MemoryEntry[];
+  entries: UserMemory[];
   scores: number[]; // One score per entry (0-1)
 }
 

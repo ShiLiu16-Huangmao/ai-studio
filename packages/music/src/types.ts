@@ -1,20 +1,20 @@
 // @ai-radio/music — Music types
 
-import type { Track, MoodLabel } from '@ai-radio/shared';
+import type { Song, MoodType } from '@ai-radio/shared';
 
 export interface MusicAdapter {
   /** Search tracks by keyword */
-  search(query: string, limit?: number): Promise<Track[]>;
+  search(query: string, limit?: number): Promise<Song[]>;
 
   /** Get track details with streaming URL */
-  getTrack(trackId: string): Promise<Track | null>;
+  getTrack(trackId: string): Promise<Song | null>;
 
   /** Get track recommendations from the music source */
   getRecommendations(params: {
     genre?: string;
     mood?: string;
     limit?: number;
-  }): Promise<Track[]>;
+  }): Promise<Song[]>;
 }
 
 export interface RecommendInput {
@@ -22,7 +22,7 @@ export interface RecommendInput {
   query?: string;
 
   /** Target mood for recommendation */
-  mood?: MoodLabel;
+  mood?: MoodType;
 
   /** Preferred genres */
   genres?: string[];
@@ -35,7 +35,7 @@ export interface RecommendInput {
 }
 
 export interface RecommendResult {
-  tracks: Track[];
-  reason: string; // Human-readable recommendation reason
-  mood: MoodLabel | null;
+  tracks: Song[];
+  reason: string;
+  mood: MoodType | null;
 }

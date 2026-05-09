@@ -13,7 +13,8 @@
     "clean": "rm -rf dist .tsbuildinfo"
   },
   "dependencies": {
-    "@ai-radio/shared": "workspace:*"
+    "@ai-radio/shared": "workspace:*",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "tsup": "^8.4.0",

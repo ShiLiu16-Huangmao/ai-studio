@@ -1,109 +1,45 @@
-// @ai-radio/prompts — Prompt template engine
+// @ai-radio/prompts — Template engine (variable replacement)
+// ===================================================================
 
-import type { PromptTemplate, PromptContext, RenderedPrompt } from './types';
-
-export class PromptEngine {
-  private templates = new Map<string, PromptTemplate>();
-
-  /** Register a template from raw markdown content */
-  register(name: string, content: string): void {
-    const variables = this.extractVariables(content);
-    this.templates.set(name, {
-      name,
-      path: `prompts/${name}.md`,
-      content,
-      variables,
-    });
+/**
+ * Simple template engine that replaces {{variable}} placeholders
+ * with values from a context object.
+ *
+ * Example:
+ *   render("你好 {{name}}，今天是{{day}}", { name: "夜汐", day: "周三" })
+ *   → "你好 夜汐，今天是周三"
+ */
+export function renderTemplate(
+  template: string,
+  ctx: Record<string, string>,
+): string {
+  let result = template;
+  for (const [key, value] of Object.entries(ctx)) {
+    result = result.replaceAll(`{{${key}}}`, value);
   }
+  return result;
+}
 
-  /** Remove a registered template */
-  unregister(name: string): void {
-    this.templates.delete(name);
+/**
+ * Extract all {{variable}} names from a template string.
+ */
+export function extractVariables(template: string): string[] {
+  const matches = template.matchAll(/\{\{(\w+)\}\}/g);
+  const vars = new Set<string>();
+  for (const match of matches) {
+    const name = match[1];
+    if (name) vars.add(name);
   }
+  return Array.from(vars);
+}
 
-  /** Get a specific template by name */
-  get(name: string): PromptTemplate | undefined {
-    return this.templates.get(name);
-  }
-
-  /** Render a template with context variables */
-  render(name: string, context: PromptContext = {}): RenderedPrompt {
-    const template = this.templates.get(name);
-    if (!template) {
-      throw new Error(`Template "${name}" not found`);
-    }
-
-    let content = template.content;
-
-    // Simple {{variable}} replacement
-    for (const variable of template.variables) {
-      const value = this.resolveVariable(variable, context);
-      content = content.replaceAll(`{{${variable}}}`, value);
-    }
-
-    return {
-      systemPrompt: content,
-      dynamicContext: this.buildDynamicContext(context),
-    };
-  }
-
-  /** List all registered template names */
-  list(): string[] {
-    return Array.from(this.templates.keys());
-  }
-
-  // ==================== Private ====================
-
-  private extractVariables(content: string): string[] {
-    const matches = content.matchAll(/\{\{(\w+)\}\}/g);
-    const vars = new Set<string>();
-    for (const match of matches) {
-      const varName = match[1];
-      if (varName) {
-        vars.add(varName);
-      }
-    }
-    return Array.from(vars);
-  }
-
-  private resolveVariable(name: string, context: PromptContext): string {
-    // Check known variables
-    switch (name) {
-      case 'djName':
-        return context.djName ?? '夜汐';
-      case 'timeOfDay':
-        return context.timeContext?.timeOfDay ?? '';
-      case 'currentTime':
-        return context.timeContext?.now ?? '';
-      case 'dayOfWeek':
-        return context.timeContext?.dayOfWeek ?? '';
-      default:
-        return '';
-    }
-  }
-
-  private buildDynamicContext(context: PromptContext): string {
-    const blocks: string[] = [];
-
-    if (context.weather) {
-      blocks.push(`【天气】${JSON.stringify(context.weather)}`);
-    }
-
-    if (context.schedule?.length) {
-      blocks.push(`【日程】${JSON.stringify(context.schedule)}`);
-    }
-
-    if (context.memories?.length) {
-      const memoryLines = context.memories.map(
-        (m) => `- (${m.createdAt}) ${m.content}`,
-      );
-      blocks.push(`【相关记忆】\n${memoryLines.join('\n')}`);
-    }
-
-    if (context.userMood) {
-      blocks.push(`【用户当前情绪】${context.userMood}`);
-    }
-
-    return blocks.join('\n\n');
-  }
+/**
+ * Compute block separator based on position in the prompt.
+ * Early blocks get heavier separators, later blocks are more compact.
+ */
+export function separator(index: number, total: number): string {
+  if (index === 0) return '';
+  if (index === 1) return '\n\n---\n\n';
+  if (index === total - 1) return '\n\n';
+  return '\n\n---\n';
 }

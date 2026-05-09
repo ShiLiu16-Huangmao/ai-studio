@@ -1,10 +1,10 @@
 // @ai-radio/music — Music recommendation engine
 
-import type { MoodLabel } from '@ai-radio/shared';
+import type { MoodType } from '@ai-radio/shared';
 import type { MusicAdapter, RecommendInput, RecommendResult } from './types';
 
 /** Genre-to-mood mapping for default recommendations */
-const MOOD_GENRE_MAP: Record<MoodLabel, string[]> = {
+const MOOD_GENRE_MAP: Record<MoodType, string[]> = {
   chill: ['jazz', 'lofi', 'ambient', 'bossanova'],
   energetic: ['pop', 'rock', 'electronic', 'funk'],
   melancholy: ['blues', 'jazz', 'ballad', 'post-rock'],
@@ -12,7 +12,7 @@ const MOOD_GENRE_MAP: Record<MoodLabel, string[]> = {
   neutral: ['jazz', 'pop', 'indie', 'folk'],
 };
 
-const MOOD_REASON_MAP: Record<MoodLabel, string> = {
+const MOOD_REASON_MAP: Record<MoodType, string> = {
   chill: '适合现在放松一下',
   energetic: '给你来点活力的节奏',
   melancholy: '这首歌懂你的心情',
@@ -60,13 +60,13 @@ export class MusicRecommender {
   }
 
   /** Get genre suggestions for a given mood */
-  getGenresForMood(mood: MoodLabel): string[] {
+  getGenresForMood(mood: MoodType): string[] {
     return MOOD_GENRE_MAP[mood] ?? [];
   }
 
   // ==================== Private ====================
 
-  private filterExcluded(tracks: import('@ai-radio/shared').Track[], excludeIds?: string[]) {
+  private filterExcluded(tracks: import('@ai-radio/shared').Song[], excludeIds?: string[]) {
     if (!excludeIds?.length) return tracks;
     const excludeSet = new Set(excludeIds);
     return tracks.filter((t) => !excludeSet.has(t.id));

@@ -1,27 +1,153 @@
-// @ai-radio/web — Root App component
+// @ai-radio/web — Root App: AI Radio PWA
+// ===================================================================
 
-import type { ReactElement } from 'react';
+import { useCallback } from 'react';
+import { useChatStore } from './stores/chatStore';
+import { usePlayerStore } from './stores/playerStore';
+import { useDJStore } from './stores/djStore';
+import { useAppStore } from './stores/appStore';
+import { useWebSocket } from './hooks/useWebSocket';
+import { useAudioPlayer } from './hooks/useAudioPlayer';
+import { useMediaSession } from './hooks/useMediaSession';
+import { apiClient } from './services/apiClient';
+import { AppShell } from './components/layout/AppShell';
+import { DJStatus } from './components/dj/DJStatus';
+import { MoodIndicator } from './components/dj/MoodIndicator';
+import { TimeDisplay } from './components/widgets/TimeDisplay';
+import { WeatherWidget } from './components/widgets/WeatherWidget';
+import { VinylDisc } from './components/player/VinylDisc';
+import { PlayerBar } from './components/player/PlayerBar';
+import { ChatPanel } from './components/chat/ChatPanel';
+import { ChatInput } from './components/chat/ChatInput';
 
-export function App(): ReactElement {
-  return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-gray-950 to-black">
-      <header className="text-center">
-        <h1 className="text-4xl font-light tracking-widest text-white/90">AI Radio</h1>
-        <p className="mt-3 text-sm text-white/40">个人 AI 电台</p>
-      </header>
+// Mock track for demo
+const MOCK_TRACK = {
+  id: 'mock_001',
+  name: 'Fly Me to the Moon',
+  artist: 'Frank Sinatra',
+  album: "It Might as Well Be Swing",
+  coverUrl: 'https://picsum.photos/400/400',
+  mp3Url: '',
+  duration: 239,
+  source: 'netease' as const,
+};
 
-      <main className="mt-8 flex flex-col items-center gap-4">
-        <div className="flex h-32 w-32 items-center justify-center rounded-full bg-white/5 ring-1 ring-white/10">
-          <span className="text-5xl">🎙️</span>
-        </div>
-        <p className="text-sm text-white/30">Phase 1 · 项目骨架已就绪</p>
-      </main>
+export function App(): JSX.Element {
+  // Initialize WS (mock mode for MVP)
+  useWebSocket(true);
 
-      <footer className="mt-auto pb-8">
-        <p className="text-xs text-white/20">
-          {new Date().toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' })}
-        </p>
-      </footer>
+  // Audio playback lifecycle
+  useAudioPlayer();
+
+  // Media Session API
+  useMediaSession();
+
+  // Store access
+  const addMessage = useChatStore((s) => s.addMessage);
+  const setStreaming = useChatStore((s) => s.setStreaming);
+  const commitStreaming = useChatStore((s) => s.commitStreamingText);
+  const play = usePlayerStore((s) => s.play);
+  const setMode = useAppStore((s) => s.setMode);
+
+  const handleSend = useCallback(async (text: string) => {
+    // Add user message
+    const userMsg = {
+      id: `msg_${Date.now()}`,
+      role: 'user' as const,
+      content: text,
+      timestamp: Date.now(),
+    };
+    addMessage(userMsg);
+
+    setMode('chatting');
+    setStreaming(true);
+
+    try {
+      // Call mock API
+      const result = await apiClient.sendMessage(text);
+      // Simulate streaming
+      const chars = result.text.split('');
+      for (let i = 0; i < chars.length; i++) {
+        await new Promise((r) => setTimeout(r, 30));
+        useChatStore.getState().appendStreamingText(chars[i] ?? '');
+      }
+
+      // Commit the streamed text
+      commitStreaming();
+
+      // Handle action
+      if (result.action === 'recommend_music' && result.track) {
+        play(MOCK_TRACK);
+      }
+
+      // Handle mood
+      if (result.mood && 'valence' in (result.mood as Record<string, number>)) {
+        const m = result.mood as { valence: number; energy: number };
+        let moodLabel: 'chill' | 'energetic' | 'melancholy' | 'cheerful' | 'neutral' = 'neutral';
+        if (m.valence >= 0.3 && m.energy >= 0.3) moodLabel = 'cheerful';
+        else if (m.valence >= 0.3) moodLabel = 'chill';
+        else if (m.valence < -0.2) moodLabel = 'melancholy';
+        else if (m.energy >= 0.5) moodLabel = 'energetic';
+
+        useDJStore.getState().updateFromServer({
+          mood: moodLabel,
+          thinking: 'idle',
+        });
+      }
+    } catch {
+      setStreaming(false);
+      addMessage({
+        id: `msg_err_${Date.now()}`,
+        role: 'assistant',
+        content: '抱歉，信号不太好... 请稍后再试。',
+        timestamp: Date.now(),
+      });
+    }
+
+    setMode('idle');
+  }, [addMessage, setStreaming, commitStreaming, play, setMode]);
+
+  // Header: DJ status
+  const header = (
+    <div>
+      <DJStatus />
+      <div className="mt-2">
+        <MoodIndicator />
+      </div>
     </div>
   );
+
+  // Main: Vinyl + Time + Weather
+  const main = (
+    <div className="flex flex-col items-center gap-4">
+      {/* Time */}
+      <TimeDisplay />
+
+      {/* Vinyl Disc */}
+      <div className="w-full py-4">
+        <VinylDisc />
+      </div>
+
+      {/* Weather */}
+      <WeatherWidget />
+
+      {/* Chat Panel */}
+      <div className="w-full mt-2">
+        <ChatPanel />
+      </div>
+    </div>
+  );
+
+  // Player bar
+  const player = <PlayerBar />;
+
+  // Chat input
+  const chat = (
+    <ChatInput
+      onSend={handleSend}
+      placeholder="和夜汐说点什么..."
+    />
+  );
+
+  return <AppShell header={header} main={main} player={player} chat={chat} />;
 }

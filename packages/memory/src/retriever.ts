@@ -1,6 +1,6 @@
 // @ai-radio/memory — Memory retriever (multi-path recall + fusion ranking)
 
-import type { MemoryEntry, MemoryType } from '@ai-radio/shared';
+import type { UserMemory, MemoryType } from '@ai-radio/shared';
 import type { MemoryStore } from './types';
 import { MEMORY } from '@ai-radio/shared';
 
@@ -33,7 +33,7 @@ export class MemoryRetriever {
    *
    * Results are fusion-ranked and decay-adjusted.
    */
-  async retrieve(input: RetrieveInput): Promise<MemoryEntry[]> {
+  async retrieve(input: RetrieveInput): Promise<UserMemory[]> {
     const limit = input.limit ?? MEMORY.MAX_INJECTED_MEMORIES;
     const keywords = this.extractKeywords(input.message);
 
@@ -88,15 +88,15 @@ export class MemoryRetriever {
   // ==================== Private ====================
 
   private fusionRank(
-    keyword: MemoryEntry[],
-    recent: MemoryEntry[],
-    important: MemoryEntry[],
+    keyword: UserMemory[],
+    recent: UserMemory[],
+    important: UserMemory[],
     limit: number,
-  ): MemoryEntry[] {
-    const scoreMap = new Map<string, { entry: MemoryEntry; score: number }>();
+  ): UserMemory[] {
+    const scoreMap = new Map<string, { entry: UserMemory; score: number }>();
 
     // Weighted scoring
-    const addScore = (entry: MemoryEntry, weight: number, rank: number) => {
+    const addScore = (entry: UserMemory, weight: number, rank: number) => {
       const existing = scoreMap.get(entry.id);
       const rankScore = rank === 0 ? 1 : 1 / (rank + 1);
       const newScore = weight * rankScore * entry.decayFactor;

@@ -1,6 +1,6 @@
 // @ai-radio/memory — Memory consolidator (extraction + deduplication + merge)
 
-import type { MemoryEntry } from '@ai-radio/shared';
+import type { UserMemory } from '@ai-radio/shared';
 import type { MemoryStore, ConsolidateInput, ConsolidateOutput, ExtractedMemory } from './types';
 
 /**
@@ -108,7 +108,7 @@ export class MemoryConsolidator {
     const unique: ExtractedMemory[] = [];
 
     for (const mem of extracted) {
-      const isDuplicate = existing.some((e: MemoryEntry) => {
+      const isDuplicate = existing.some((e: UserMemory) => {
         const overlap = mem.keywords.filter((k) => e.keywords.includes(k));
         return overlap.length >= 2; // 2+ keyword overlap = likely duplicate
       });

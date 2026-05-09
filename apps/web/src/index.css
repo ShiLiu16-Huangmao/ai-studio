@@ -1,30 +1,186 @@
 @import 'tailwindcss';
 
+/* ================================================================
+   AI Radio — 现代极简暗黑风 + 复古数字元素
+   ================================================================ */
+
 @theme {
-  --color-black: #0a0a0a;
-  --color-paper: #1a1a1a;
+  /* Radio dark palette */
+  --color-bg: #0a0a0a;
+  --color-surface: #141414;
+  --color-surface-elevated: #1c1c1c;
+  --color-border: rgba(255, 255, 255, 0.06);
+
+  /* Cyan-green accent */
+  --color-accent: #00ffc8;
+  --color-accent-dim: rgba(0, 255, 200, 0.15);
+  --color-accent-glow: rgba(0, 255, 200, 0.4);
+
+  /* ON AIR red */
+  --color-onair: #ff3344;
+  --color-onair-glow: rgba(255, 51, 68, 0.5);
+
+  /* Text */
+  --color-text-primary: #f0f0f0;
+  --color-text-secondary: rgba(255, 255, 255, 0.55);
+  --color-text-muted: rgba(255, 255, 255, 0.25);
+
+  /* Typography */
+  --font-mono: 'Courier New', 'Consolas', monospace;
 }
+
+/* ================================================================
+   Base
+   ================================================================ */
 
 * {
   box-sizing: border-box;
 }
 
+html {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  -webkit-tap-highlight-color: transparent;
+}
+
 body {
   margin: 0;
   padding: 0;
+  min-height: 100dvh;
   overscroll-behavior: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--color-bg);
 }
 
-/* Custom scrollbar for dark theme */
+/* ================================================================
+   Scrollbar
+   ================================================================ */
+
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 2px;
+}
+
+/* ================================================================
+   Glass Panel
+   ================================================================ */
+
+.glass {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(12px);
+}
+
+.glass-elevated {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  backdrop-filter: blur(16px);
+}
+
+/* ================================================================
+   ON AIR Animation
+   ================================================================ */
+
+@keyframes onair-pulse {
+  0%, 100% {
+    box-shadow: 0 0 4px var(--color-onair), 0 0 8px var(--color-onair-glow);
+  }
+  50% {
+    box-shadow: 0 0 8px var(--color-onair), 0 0 16px var(--color-onair-glow);
+  }
+}
+
+.onair-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--color-onair);
+  animation: onair-pulse 2s ease-in-out infinite;
+}
+
+/* ================================================================
+   Accent Glow
+   ================================================================ */
+
+@keyframes accent-pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+.accent-glow {
+  color: var(--color-accent);
+  text-shadow: 0 0 8px var(--color-accent-glow);
+}
+
+/* ================================================================
+   Digital Display (retro dot-matrix style)
+   ================================================================ */
+
+.digital {
+  font-family: var(--font-mono);
+  letter-spacing: 0.05em;
+  color: var(--color-accent);
+}
+
+/* ================================================================
+   Vinyl Rotation
+   ================================================================ */
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.vinyl-spin {
+  animation: spin 4s linear infinite;
+}
+
+.vinyl-paused {
+  animation-play-state: paused;
+}
+
+/* ================================================================
+   Waveform bars
+   ================================================================ */
+
+@keyframes waveform-bar {
+  0%, 100% { height: 4px; }
+  50% { height: 16px; }
+}
+
+/* ================================================================
+   Chat input
+   ================================================================ */
+
+.chat-input {
+  background: var(--color-surface-elevated);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 15px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.chat-input:focus {
+  border-color: var(--color-accent);
+}
+.chat-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+/* ================================================================
+   Safe area (mobile notch)
+   ================================================================ */
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
 }

@@ -1,38 +1,47 @@
-// @ai-radio/shared — Schedule schemas
+// @ai-radio/shared — Schedule item schema
+// ===================================================================
 
 import { z } from 'zod';
-import { RepeatTypeSchema } from './enums';
 
-// ==================== Schedule Item ====================
+/**
+ * 日程/提醒事项
+ *
+ * 用户设定的定时提醒，可用于 DJ 自动播报
+ */
 export const ScheduleItemSchema = z.object({
+  /** 日程唯一标识 */
   id: z.string(),
-  title: z.string().min(1).max(200),
-  time: z.string().regex(/^\d{2}:\d{2}$/, 'Must be HH:mm format'),
-  date: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/, 'Must be YYYY-MM-DD format')
-    .nullable(),
-  repeat: RepeatTypeSchema.nullable(),
-  enabled: z.boolean(),
-  createdAt: z.string().datetime(),
-});
-export type ScheduleItem = z.infer<typeof ScheduleItemSchema>;
 
-// ==================== Create Schedule Input ====================
-export const CreateScheduleInputSchema = z.object({
+  /** 日程标题 */
   title: z.string().min(1).max(200),
+
+  /**
+   * 提醒时间 (HH:mm 格式)
+   * @example "09:30"
+   */
   time: z.string().regex(/^\d{2}:\d{2}$/),
+
+  /**
+   * 提醒日期 (YYYY-MM-DD 格式)
+   * null 表示每日提醒
+   * @example "2026-05-10"
+   */
   date: z
     .string()
     .regex(/^\d{4}-\d{2}-\d{2}$/)
-    .nullable()
-    .optional(),
-  repeat: RepeatTypeSchema.nullable().optional(),
-});
-export type CreateScheduleInput = z.infer<typeof CreateScheduleInputSchema>;
+    .nullable(),
 
-// ==================== Update Schedule Input ====================
-export const UpdateScheduleInputSchema = CreateScheduleInputSchema.partial().extend({
-  enabled: z.boolean().optional(),
+  /**
+   * 重复模式
+   *
+   * daily  — 每天
+   * weekly — 每周
+   * none   — 不重复（单次提醒）
+   */
+  repeat: z.enum(['daily', 'weekly', 'none']).nullable(),
+
+  /** 是否启用 */
+  enabled: z.boolean(),
 });
-export type UpdateScheduleInput = z.infer<typeof UpdateScheduleInputSchema>;
+
+export type ScheduleItem = z.infer<typeof ScheduleItemSchema>;
